@@ -1,0 +1,5 @@
+{
+  "name": "SAF Fermion FieldForce",
+  "description": "A comprehensive application for SAF Fermion FieldForce, managing doctors, chemists, tour plans, and daily call reports.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}
