@@ -22,9 +22,6 @@ jobs:
           npm install @tailwindcss/oxide-linux-x64-gnu
           npm install
 
-      - name: Download App Icon run: | mkdir -p resources curl -L "https://your-domain.com/icon.png" -o resources/icon.png 
-      - name: Generate App Icons run: | npm install @capacitor/assets --save-dev npx capacitor-assets generate
-
       - name: Build Web Project
         run: npm run build
         env:
@@ -34,13 +31,23 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21' # Updated from 17 to 21 to match your project settings
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Add Android Platform
         run: npx cap add android || echo "Android platform already exists"
+
+      - name: Download App Icon
+        run: |
+          mkdir -p resources
+          curl -L "https://your-domain.com/icon.png" -o resources/icon.png
+
+      - name: Generate App Icons
+        run: |
+          npm install @capacitor/assets --save-dev
+          npx capacitor-assets generate
 
       - name: Sync Capacitor
         run: npx cap sync
