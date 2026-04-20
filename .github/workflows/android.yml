@@ -2,77 +2,69 @@ name: Build Android APK
 
 on:
 push:
-branches: [ main, master ]
+branches:
+- main
+- master
 
 jobs:
 build:
 runs-on: ubuntu-latest
 
+```
 steps:
-  # ✅ Checkout Code
   - name: Checkout Source
     uses: actions/checkout@v4
 
-  # ✅ Setup Node
   - name: Setup Node.js
     uses: actions/setup-node@v4
     with:
       node-version: 22
-      cache: 'npm'
+      cache: npm
 
-  # ✅ Install Dependencies
   - name: Install Dependencies
     run: |
       npm install @tailwindcss/oxide-linux-x64-gnu
       npm install
 
-  # ✅ Download App Icon from URL
   - name: Download App Icon
     run: |
       mkdir -p resources
       curl -L "https://demo.atlantisintel.com:8082/rt/image/abc.png" -o resources/icon.png
 
-  # ✅ Generate Capacitor Icons
   - name: Generate App Icons
     run: |
       npm install @capacitor/assets --save-dev
       npx capacitor-assets generate
 
-  # ✅ Build Web App
   - name: Build Web Project
     run: npm run build
     env:
       NODE_ENV: production
 
-  # ✅ Setup Java (Required for Android)
   - name: Setup Java
     uses: actions/setup-java@v4
     with:
-      distribution: 'zulu'
-      java-version: '21'
+      distribution: zulu
+      java-version: 21
 
-  # ✅ Setup Android SDK
   - name: Setup Android SDK
     uses: android-actions/setup-android@v3
 
-  # ✅ Add Android Platform (Safe Re-run)
   - name: Add Android Platform
-    run: npx cap add android || echo "Android platform already exists"
+    run: npx cap add android || echo "Android already exists"
 
-  # ✅ Sync Capacitor
   - name: Sync Capacitor
     run: npx cap sync
 
-  # ✅ Build APK
   - name: Build APK
     run: |
       cd android
       chmod +x gradlew
       ./gradlew assembleDebug
 
-  # ✅ Upload APK Artifact
   - name: Upload APK
     uses: actions/upload-artifact@v4
     with:
       name: FieldForce-APK
       path: android/app/build/outputs/apk/debug/app-debug.apk
+```
