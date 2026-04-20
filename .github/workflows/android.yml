@@ -1,70 +1,58 @@
 name: Build Android APK
 
 on:
-push:
-branches:
-- main
-- master
+  push:
+    branches: [ main, master ]
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
- 
-steps:
-  - name: Checkout Source
-    uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
 
-  - name: Setup Node.js
-    uses: actions/setup-node@v4
-    with:
-      node-version: 22
-      cache: npm
+      - name: Install Dependencies
+        run: |
+          npm install @tailwindcss/oxide-linux-x64-gnu
+          npm install
 
-  - name: Install Dependencies
-    run: |
-      npm install @tailwindcss/oxide-linux-x64-gnu
-      npm install
+      - name: Download App Icon run: | mkdir -p resources curl -L "https://your-domain.com/icon.png" -o resources/icon.png 
+      - name: Generate App Icons run: | npm install @capacitor/assets --save-dev npx capacitor-assets generate
 
-  - name: Download App Icon
-    run: |
-      mkdir -p resources
-      curl -L "https://demo.atlantisintel.com:8082/rt/image/abc.png" -o resources/icon.png
+      - name: Build Web Project
+        run: npm run build
+        env:
+          NODE_ENV: production
 
-  - name: Generate App Icons
-    run: |
-      npm install @capacitor/assets --save-dev
-      npx capacitor-assets generate
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21' # Updated from 17 to 21 to match your project settings
 
-  - name: Build Web Project
-    run: npm run build
-    env:
-      NODE_ENV: production
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-  - name: Setup Java
-    uses: actions/setup-java@v4
-    with:
-      distribution: zulu
-      java-version: 21
+      - name: Add Android Platform
+        run: npx cap add android || echo "Android platform already exists"
 
-  - name: Setup Android SDK
-    uses: android-actions/setup-android@v3
+      - name: Sync Capacitor
+        run: npx cap sync
 
-  - name: Add Android Platform
-    run: npx cap add android || echo "Android already exists"
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
-  - name: Sync Capacitor
-    run: npx cap sync
-
-  - name: Build APK
-    run: |
-      cd android
-      chmod +x gradlew
-      ./gradlew assembleDebug
-
-  - name: Upload APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: FieldForce-APK
-      path: android/app/build/outputs/apk/debug/app-debug.apk
- 
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FieldForce-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
